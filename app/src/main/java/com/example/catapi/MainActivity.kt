@@ -2,25 +2,29 @@ package com.example.catapi
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
+import com.example.catapi.Utills.CONSTANTS
+import com.example.catapi.Utills.CONSTANTS.TAG
 
 import com.example.catapi.presentation.PaginationAdapter
 import com.example.catapi.presentation.PaginationScrollListener
 import com.example.catapi.retrofit.ApiInterface
+import com.example.catapi.retrofit.Cat
 import com.example.catapi.retrofit.ClientApi
-import com.example.catapi.retrofit.Movie
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
 
     private var paginationAdapter: PaginationAdapter? = null
-    private var movieService: ApiInterface? = null
+    private var catService: ApiInterface? = null
     private var progressBar: ProgressBar? = null
     private var PAGE_START = 1
     private var isLoading = false
@@ -36,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         var recyclerView: RecyclerView = findViewById(R.id.recyclerview)
         progressBar = findViewById(R.id.progressbar)
 
-        movieService = ClientApi.getClient()?.create(ApiInterface::class.java)
+        catService = ClientApi.getClient()?.create(ApiInterface::class.java)
         var linearLayoutManager: LinearLayoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         paginationAdapter = PaginationAdapter(this)
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.addOnScrollListener(object : PaginationScrollListener(linearLayoutManager) {
 
             override fun loadMoreItems() {
+                Log.d(CONSTANTS.TAG, "load more")
                 isLoading = true
                 currentPage += 1
                 loadNextPage()
@@ -56,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun isLoading(): Boolean {
-                return isLoading;
+                return isLoading
             }
 
         })
@@ -66,20 +71,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNextPage() {
 
-        movieService!!.getMovies().enqueue(object : Callback<MutableList<Movie>> {
+        catService!!.getCats("10").enqueue(object : Callback<MutableList<Cat>> {
             override fun onResponse(
-                call: Call<MutableList<Movie>>,
-                response: Response<MutableList<Movie>>
+                call: Call<MutableList<Cat>>,
+                response: Response<MutableList<Cat>>
             ) {
-                paginationAdapter!!.removeLoadingFooter()
-                isLoading = false
-                val results: MutableList<Movie> = response.body()
-                paginationAdapter!!.addAll(results)
-                if (currentPage != TOTAL_PAGES) paginationAdapter!!.addLoadingFooter()
-                else isLastPage = true
+                        paginationAdapter!!.removeLoadingFooter()
+                        isLoading = false
+                        val results: MutableList<Cat> = response.body()
+                        paginationAdapter!!.addAll(results)
+                        if (currentPage != TOTAL_PAGES) paginationAdapter!!.addLoadingFooter()
+                        else isLastPage = true
             }
 
-            override fun onFailure(call: Call<MutableList<Movie>>?, t: Throwable) {
+            override fun onFailure(call: Call<MutableList<Cat>>?, t: Throwable) {
                 t.printStackTrace()
             }
 
@@ -88,19 +93,19 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun loadFirstPage() {
-        movieService!!.getMovies().enqueue(object : Callback<MutableList<Movie>> {
+        catService!!.getCats("10").enqueue(object : Callback<MutableList<Cat>> {
             override fun onResponse(
-                call: Call<MutableList<Movie>?>?,
-                response: Response<MutableList<Movie>>
+                call: Call<MutableList<Cat>?>?,
+                response: Response<MutableList<Cat>>
             ) {
-                val results: MutableList<Movie> = response.body()
-                progressBar!!.visibility = View.GONE
-                paginationAdapter!!.addAll(results)
-                if (currentPage <= TOTAL_PAGES) paginationAdapter!!.addLoadingFooter() else isLastPage =
-                    true
+                        val results: MutableList<Cat> = response.body()
+                        progressBar!!.visibility = View.GONE
+                        paginationAdapter!!.addAll(results)
+                        if (currentPage <= TOTAL_PAGES) paginationAdapter!!.addLoadingFooter() else isLastPage =
+                            true
             }
 
-            override fun onFailure(call: Call<MutableList<Movie>?>?, t: Throwable?) {
+            override fun onFailure(call: Call<MutableList<Cat>?>?, t: Throwable?) {
 
             }
         })

@@ -4,33 +4,34 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.catapi.retrofit.Movie
 import java.util.*
 
-import android.R
+
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import org.w3c.dom.Text
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.example.catapi.R
+import com.example.catapi.retrofit.Cat
 
 
 class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var context: Context? = null
-    var movieList: MutableList<Movie>
+    var context: Context = context
+    var catList: MutableList<Cat>
     val LOADING = 1
     val ITEM = 1
     var isLoadingAdded = false
 
     init {
-        this.context = context
-        movieList = LinkedList()
+        catList = LinkedList()
     }
 
     @JvmName("setMovieList1")
-    fun setMovieList(inputMovieList: MutableList<Movie>) {
-        movieList = inputMovieList
+    fun setMovieList(inputMovieList: MutableList<Cat>) {
+        catList = inputMovieList
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -40,7 +41,7 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
         when (viewType) {
             ITEM -> {
                 val viewItem: View = inflater.inflate(
-                    R.layout.item_list,
+                    R.layout.list_item,
                     parent,
                     false
                 )
@@ -48,7 +49,7 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
             }
             LOADING -> {
                 val viewLoading: View = inflater.inflate(
-                    R.layout.item_progress,
+                    R.layout.list_progress,
                     parent,
                     false
                 )
@@ -59,11 +60,13 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        var movie = movieList?.get(position)
+        var movie = catList[position]
         when (getItemViewType(position)) {
             ITEM -> {
                 var movieViewHolder: MovieViewHolder = holder as MovieViewHolder
-                movieViewHolder.movieTitle.text = movie?.getTitle()
+                movieViewHolder.movieTitle.text = movie?.id
+
+                Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform()).into(movieViewHolder.movieImage);
             }
             LOADING -> {
                 var loadingViewHolder: LoadingViewHolder = holder as LoadingViewHolder
@@ -74,52 +77,50 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
 
 
     override fun getItemCount(): Int {
-        return if (movieList == null) 0 else movieList!!.size
+        return if (catList == null) 0 else catList!!.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == movieList!!.size - 1 && isLoadingAdded) LOADING else ITEM
+        return if (position == catList!!.size - 1 && isLoadingAdded) LOADING else ITEM
     }
 
     fun addLoadingFooter(){
         isLoadingAdded = true
-        add(Movie())
+        //add(Movie())
     }
 
     fun removeLoadingFooter() {
         isLoadingAdded = false
-        var position = movieList!!.size - 1
-        val result: Movie = getItem(position)
+        var position = catList!!.size - 1
+        val result: Cat = getItem(position)
 
-        if (result != null) {
-            movieList.removeAt(position)
-            notifyItemRemoved(position)
-        }
+        catList.removeAt(position)
+        notifyItemRemoved(position)
     }
 
-    fun add(movie: Movie)
+    fun add(cat: Cat)
     {
-        movieList.add(movie)
-        notifyItemInserted(movieList.size - 1)
+        catList.add(cat)
+        notifyItemInserted(catList.size - 1)
     }
 
-    fun addAll(movieResults: MutableList<Movie>){
+    fun addAll(movieResults: MutableList<Cat>){
         for(elem in movieResults)
         {
             add(elem)
         }
     }
 
-    fun getItem(position: Int):Movie
+    fun getItem(position: Int):Cat
     {
-        return movieList[position]
+        return catList[position]
     }
 }
 
 class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     var movieTitle: TextView = itemView.findViewById(R.id.movie_title)
-    var movieImage: ImageView = itemView.findViewById(R.id.movie_image)
+    var movieImage: ImageView = itemView.findViewById(R.id.movie_poster)
 
 }
 

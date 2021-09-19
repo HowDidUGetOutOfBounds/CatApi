@@ -6,19 +6,16 @@ import retrofit2.Retrofit
 import retrofit2.Call
 
 import retrofit2.http.GET
-
-
-
+import retrofit2.http.Query
 
 
 class ClientApi {
-    companion object
-    {
+    companion object {
         fun getClient(): Retrofit? {
             if (retrofit == null) {
                 retrofit = Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl("https://velmm.com/apis/")
+                    .baseUrl("https://api.thecatapi.com/v1/images/")
                     .build()
             }
             return retrofit
@@ -30,6 +27,8 @@ class ClientApi {
 }
 
 interface ApiInterface {
-    @GET("volley_array.json")
-    fun getMovies(): Call<MutableList<Movie>>
+    @GET("search?api_key=4c880356-6ac8-4074-9563-88661e06bd41")
+    fun getCats(
+        @Query("limit") amountOfCats: String,
+    ): Call<MutableList<Cat>>
 }
