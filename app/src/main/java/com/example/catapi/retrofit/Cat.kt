@@ -13,4 +13,6 @@ data class Cat (
     @SerializedName("height") val height : Int
 
 
-)
+) {
+    constructor() : this("0", "0", 0, 0) // empty constructor to add footer
+}

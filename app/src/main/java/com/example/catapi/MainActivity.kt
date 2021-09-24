@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             override fun loadMoreItems() {
                 Log.d(CONSTANTS.TAG, "load more")
                 isLoading = true
-                currentPage += 1
+                //currentPage += 1
                 loadNextPage()
             }
 

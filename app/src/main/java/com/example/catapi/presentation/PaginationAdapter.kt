@@ -1,6 +1,7 @@
 package com.example.catapi.presentation
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -14,14 +15,16 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.catapi.R
+import com.example.catapi.Utills.CONSTANTS.TAG
 import com.example.catapi.retrofit.Cat
+import com.example.catapi.retrofit.Movie
 
 
 class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var context: Context = context
     var catList: MutableList<Cat>
-    val LOADING = 1
+    val LOADING = 0
     val ITEM = 1
     var isLoadingAdded = false
 
@@ -71,6 +74,7 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
             LOADING -> {
                 var loadingViewHolder: LoadingViewHolder = holder as LoadingViewHolder
                 loadingViewHolder.progressBar.visibility = View.VISIBLE
+                Log.d(TAG, "onBindViewHolder: footer")
             }
         }
     }
@@ -86,7 +90,9 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
 
     fun addLoadingFooter(){
         isLoadingAdded = true
-        //add(Movie())
+        add(Cat()) // add just footer, no data requred
+        Log.d(TAG, "onBindViewHolder: footer required")
+
     }
 
     fun removeLoadingFooter() {
