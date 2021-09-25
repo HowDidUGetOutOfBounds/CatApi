@@ -69,12 +69,11 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
                 var movieViewHolder: MovieViewHolder = holder as MovieViewHolder
                 movieViewHolder.movieTitle.text = movie?.id
 
-                Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform()).into(movieViewHolder.movieImage);
+                Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform()).into(movieViewHolder.movieImage)
             }
             LOADING -> {
                 var loadingViewHolder: LoadingViewHolder = holder as LoadingViewHolder
                 loadingViewHolder.progressBar.visibility = View.VISIBLE
-                Log.d(TAG, "onBindViewHolder: footer")
             }
         }
     }
@@ -91,7 +90,7 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
     fun addLoadingFooter(){
         isLoadingAdded = true
         add(Cat()) // add just footer, no data requred
-        Log.d(TAG, "onBindViewHolder: footer required")
+
 
     }
 
@@ -124,9 +123,13 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
 }
 
 class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    var movieTitle: TextView
+    var movieImage: ImageView
 
-    var movieTitle: TextView = itemView.findViewById(R.id.movie_title)
-    var movieImage: ImageView = itemView.findViewById(R.id.movie_poster)
+    init {
+        movieTitle = itemView.findViewById(R.id.movie_title)
+        movieImage = itemView.findViewById(R.id.movie_poster)
+    }
 
 }
 

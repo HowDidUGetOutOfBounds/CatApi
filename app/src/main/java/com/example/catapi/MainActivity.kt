@@ -12,13 +12,13 @@ import com.example.catapi.Utills.CONSTANTS.TAG
 
 import com.example.catapi.presentation.PaginationAdapter
 import com.example.catapi.presentation.PaginationScrollListener
+import com.example.catapi.presentation.RecyclerItemClickListener
 import com.example.catapi.retrofit.ApiInterface
 import com.example.catapi.retrofit.Cat
 import com.example.catapi.retrofit.ClientApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
@@ -65,6 +65,20 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        recyclerView.addOnItemTouchListener(
+            RecyclerItemClickListener(applicationContext, recyclerView, object : RecyclerItemClickListener.OnItemClickListener{
+                override fun onItemClick(view: View, position: Int) {
+
+                    Log.d(TAG, "onItemClick: $position")
+                }
+
+                override fun onLongItemClick(view: View, position: Int) {
+                    Log.d(TAG, "onLongItemClick: $position")
+                }
+
+            })
+        )
 
         loadFirstPage();
     }
