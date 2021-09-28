@@ -1,14 +1,22 @@
 package com.example.catapi.presentation
 
+import android.animation.Animator
 import android.content.Context
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.example.catapi.R
+import com.example.catapi.Utills.CONSTANTS.TAG
 
-class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, val listener: OnItemClickListener) : RecyclerView.OnItemTouchListener {
+class RecyclerItemClickListener(private val context: Context, val recyclerView: RecyclerView, val listener: OnItemClickListener) : RecyclerView.OnItemTouchListener {
 
     var mGestureDetector: GestureDetector
+    private val currentAnimator: Animator? = null
 
     interface OnItemClickListener{
         fun onItemClick(view: View, position: Int)
@@ -27,8 +35,7 @@ class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, va
 
                 if(child != null)
                 {
-                    //TODO: add onClick download here
-                    listener.onItemClick(child, recyclerView.getChildAdapterPosition(child))
+                    listener.onLongItemClick(child, recyclerView.getChildAdapterPosition(child))
                 }
             }
         })
@@ -36,10 +43,19 @@ class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, va
 
     override fun onInterceptTouchEvent(recycler: RecyclerView, e: MotionEvent): Boolean {
         val child: View? = recycler.findChildViewUnder(e.x, e.y)
+        val imageView: ImageView = recycler.findViewById(R.id.movie_poster)
+        val imageViewExpanded: ImageView  = recycler.findViewById(R.id.movie_poster_expanded)
+
 
         if (child != null && mGestureDetector.onTouchEvent(e))
         {
-            listener.onItemClick(child, recycler.getChildAdapterPosition(child))
+            val position = recycler.getChildAdapterPosition(child)
+
+            imageView.setOnClickListener {
+                zoomImageFromThumb(imageView,imageViewExpanded, position)
+            }
+
+            listener.onItemClick(child, position)
             return true
         }
         return false
@@ -51,6 +67,31 @@ class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, va
 
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
 
+    }
+
+    private fun zoomImageFromThumb(imageView: ImageView, imageViewExpanded: ImageView, position: Int) {
+        var myAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>? = null
+
+        if(recyclerView.adapter is PaginationAdapter) {
+            var myAdapter = recyclerView.adapter as PaginationAdapter
+        }
+        else
+        {
+            Log.d(TAG, "zoomImageFromThumb: ADAPTER TYPE NOT SUPPORTED")
+            return
+        }
+
+
+        // If there's an animation in progress, cancel it
+        // immediately and proceed with this one.
+        currentAnimator?.cancel()
+
+        // Load the high-resolution "zoomed-in" image.
+        Glide.with(context)
+            .load(
+            (myAdapter as PaginationAdapter).getItem(position).url)
+            .apply(RequestOptions.centerCropTransform())
+            .into(imageViewExpanded)
     }
 
 }
