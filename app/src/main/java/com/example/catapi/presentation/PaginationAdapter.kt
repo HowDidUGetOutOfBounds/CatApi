@@ -1,6 +1,8 @@
 package com.example.catapi.presentation
 
+import android.animation.Animator
 import android.content.Context
+import android.media.Image
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,6 +11,7 @@ import java.util.*
 
 
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -18,18 +21,28 @@ import com.example.catapi.R
 import com.example.catapi.Utills.CONSTANTS.TAG
 import com.example.catapi.retrofit.Cat
 import com.example.catapi.retrofit.Movie
+import java.lang.ref.WeakReference
 
 
-class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PaginationAdapter(context: Context, listener: OnItemClickListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var context: Context = context
     var catList: MutableList<Cat>
     val LOADING = 0
     val ITEM = 1
     var isLoadingAdded = false
+    private val listener: OnItemClickListener
+    var currentAnimator: Animator? = null
+
+    // The system "short" animation time duration, in milliseconds. This
+    // duration is ideal for subtle animations or animations that occur
+    // very frequently.
+    private val shortAnimationDuration = 1000
 
     init {
         catList = LinkedList()
+        this.listener = listener
     }
 
     @JvmName("setMovieList1")
@@ -48,7 +61,7 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
                     parent,
                     false
                 )
-                viewHolder = MovieViewHolder(viewItem)
+                viewHolder = MovieViewHolder(viewItem, listener)
             }
             LOADING -> {
                 val viewLoading: View = inflater.inflate(
@@ -69,7 +82,13 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
                 var movieViewHolder: MovieViewHolder = holder as MovieViewHolder
                 movieViewHolder.movieTitle.text = movie?.id
 
-                Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform()).into(movieViewHolder.movieImage)
+                movieViewHolder.movieImage.setOnClickListener {
+                    Log.d(TAG, "click from vh at: $position")
+                    zoomImageFromThumb(movieViewHolder, position)
+                }
+
+                Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform())
+                    .into(movieViewHolder.movieImage)
             }
             LOADING -> {
                 var loadingViewHolder: LoadingViewHolder = holder as LoadingViewHolder
@@ -87,11 +106,9 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
         return if (position == catList!!.size - 1 && isLoadingAdded) LOADING else ITEM
     }
 
-    fun addLoadingFooter(){
+    fun addLoadingFooter() {
         isLoadingAdded = true
-        add(Cat()) // add just footer, no data requred
-
-
+        add(Cat()) // add just footer, no data required
     }
 
     fun removeLoadingFooter() {
@@ -103,36 +120,76 @@ class PaginationAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.Vi
         notifyItemRemoved(position)
     }
 
-    fun add(cat: Cat)
-    {
+    fun add(cat: Cat) {
         catList.add(cat)
         notifyItemInserted(catList.size - 1)
     }
 
-    fun addAll(movieResults: MutableList<Cat>){
-        for(elem in movieResults)
-        {
+    fun addAll(movieResults: MutableList<Cat>) {
+        for (elem in movieResults) {
             add(elem)
         }
     }
 
-    fun getItem(position: Int):Cat
-    {
+    fun getItem(position: Int): Cat {
         return catList[position]
     }
+
+
+    private fun zoomImageFromThumb(vh: MovieViewHolder, position: Int) {
+
+        // If there's an animation in progress, cancel it
+        // immediately and proceed with this one.
+        currentAnimator?.cancel()
+
+        // Load the high-resolution "zoomed-in" image.
+        Glide.with(context)
+            .load(this.getItem(position).url)
+            .apply(RequestOptions.centerCropTransform())
+            .into(vh.movieImageExpanded)
+    }
+
+
 }
 
-class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class MovieViewHolder(itemView: View, listener: OnItemClickListener) :
+    RecyclerView.ViewHolder(itemView), View.OnClickListener {
     var movieTitle: TextView
     var movieImage: ImageView
+    var movieImageExpanded: ImageView
+    var downloadBtn: Button
+    private var listenerRef: WeakReference<OnItemClickListener>
 
     init {
         movieTitle = itemView.findViewById(R.id.movie_title)
         movieImage = itemView.findViewById(R.id.movie_poster)
+        movieImageExpanded = itemView.findViewById(R.id.movie_poster_expanded)
+        downloadBtn = itemView.findViewById(R.id.downloadBtn)
+        listenerRef = WeakReference(listener)
+
+        downloadBtn.setOnClickListener(this)
+        movieImage.setOnClickListener(this)
     }
 
+    override fun onClick(v: View?) {
+        when (v!!.id) {
+            downloadBtn.id -> {
+                Log.d(TAG, "onClick: case download")
+            }
+            movieImage.id -> {
+                Log.d(TAG, "onClick: case image click")
+            }
+            else -> {
+                Log.d(TAG, "onClick: case default")
+            }
+        }
+
+        listenerRef.get()?.onItemClick(itemView, adapterPosition)
+    }
 }
 
 class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var progressBar: ProgressBar = itemView.findViewById(R.id.loadmore_progres)
 }
+
+

@@ -9,10 +9,10 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catapi.Utills.CONSTANTS
 import com.example.catapi.Utills.CONSTANTS.TAG
+import com.example.catapi.presentation.OnItemClickListener
 
 import com.example.catapi.presentation.PaginationAdapter
 import com.example.catapi.presentation.PaginationScrollListener
-import com.example.catapi.presentation.RecyclerItemClickListener
 import com.example.catapi.retrofit.ApiInterface
 import com.example.catapi.retrofit.Cat
 import com.example.catapi.retrofit.ClientApi
@@ -43,7 +43,17 @@ class MainActivity : AppCompatActivity() {
         catService = ClientApi.getClient()?.create(ApiInterface::class.java)
         var linearLayoutManager: LinearLayoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        paginationAdapter = PaginationAdapter(this)
+        paginationAdapter = PaginationAdapter(this, object : OnItemClickListener {
+                override fun onItemClick(view: View, position: Int) {
+
+                    Log.d(TAG, "onItemClick: $position")
+                }
+
+                override fun onLongItemClick(view: View, position: Int) {
+                    Log.d(TAG, "onLongItemClick: $position")
+                }
+
+        })
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = paginationAdapter
 
@@ -66,21 +76,22 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-        recyclerView.addOnItemTouchListener(
-            RecyclerItemClickListener(applicationContext, recyclerView, object : RecyclerItemClickListener.OnItemClickListener{
-                override fun onItemClick(view: View, position: Int) {
+//        recyclerView
+//            .addOnItemTouchListener(
+//            RecyclerItemClickListener(applicationContext, recyclerView, object : RecyclerItemClickListener.OnItemClickListener{
+//                override fun onItemClick(view: View, position: Int) {
+//
+//                    Log.d(TAG, "onItemClick: $position")
+//                }
+//
+//                override fun onLongItemClick(view: View, position: Int) {
+//                    Log.d(TAG, "onLongItemClick: $position")
+//                }
+//
+//            })
+//        )
 
-                    Log.d(TAG, "onItemClick: $position")
-                }
-
-                override fun onLongItemClick(view: View, position: Int) {
-                    Log.d(TAG, "onLongItemClick: $position")
-                }
-
-            })
-        )
-
-        loadFirstPage();
+        loadFirstPage()
     }
 
     private fun loadNextPage() {

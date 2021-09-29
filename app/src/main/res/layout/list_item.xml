@@ -42,7 +42,7 @@
             app:layout_constraintTop_toBottomOf="@id/movie_poster" />
 
         <Button
-            android:id="@+id/movie_desc"
+            android:id="@+id/downloadBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
