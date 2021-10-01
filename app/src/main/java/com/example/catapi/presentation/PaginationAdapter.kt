@@ -1,27 +1,26 @@
 package com.example.catapi.presentation
 
+
 import android.animation.Animator
 import android.content.Context
-import android.media.Image
+import android.graphics.Point
+import android.graphics.Rect
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-import java.util.*
-
-
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.catapi.R
 import com.example.catapi.Utills.CONSTANTS.TAG
 import com.example.catapi.retrofit.Cat
-import com.example.catapi.retrofit.Movie
 import java.lang.ref.WeakReference
+import java.util.*
 
 
 class PaginationAdapter(context: Context, listener: OnItemClickListener) :
@@ -147,6 +146,25 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
             .load(this.getItem(position).url)
             .apply(RequestOptions.centerCropTransform())
             .into(vh.movieImageExpanded)
+
+        // Calculate the starting and ending bounds for the zoomed-in image.
+        // This step involves lots of math. Yay, math.
+        val startBounds = Rect()
+        val finalBounds = Rect()
+        val globalOffset = Point()
+
+        // The start bounds are the global visible rectangle of the thumbnail,
+        // and the final bounds are the global visible rectangle of the image
+        // view. Also set the image view's offset as the origin for the
+        // bounds, since that's the origin for the positioning animation
+        // properties (X, Y).
+        vh.movieImage.getGlobalVisibleRect(startBounds)
+        vh.movieImageExpanded.getGlobalVisibleRect(finalBounds, globalOffset)
+        startBounds.offset(-globalOffset.x, -globalOffset.y)
+        finalBounds.offset(-globalOffset.x, -globalOffset.y)
+
+
+
     }
 
 
