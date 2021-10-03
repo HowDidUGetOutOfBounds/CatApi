@@ -6,9 +6,9 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.Point
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,8 +25,16 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.catapi.R
 import com.example.catapi.Utills.CONSTANTS.TAG
 import com.example.catapi.retrofit.Cat
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
+import android.graphics.Bitmap
+import java.lang.Exception
 
 
 class PaginationAdapter(context: Context, listener: OnItemClickListener) :
@@ -90,6 +98,10 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
                 movieViewHolder.movieImage.setOnClickListener {
                     Log.d(TAG, "click from vh at: $position")
                     zoomImageFromThumb(movieViewHolder, position)
+                }
+
+                movieViewHolder.downloadBtn.setOnClickListener {
+                    saveImageToGallery(position)
                 }
 
                 Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform())
@@ -273,7 +285,51 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
 
     }
 
+    private fun saveImageToGallery(position: Int) {
+        val bitmapDrawable : BitmapDrawable = BitmapDrawable(context.resources, getBitmapFromURL(catList[position].url))
 
+        val bitmap : Bitmap = bitmapDrawable.bitmap
+
+        var outputStream : FileOutputStream? = null
+        var file : File = Environment.getExternalStorageDirectory()
+
+        val dir: File = File(file.absolutePath + "/MyPics")
+        dir.mkdirs()
+
+        val fileName : String = String.format("%d.png", System.currentTimeMillis())
+
+        val outFile = File(dir, fileName)
+        try {
+            outputStream = FileOutputStream(outFile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        try {
+            outputStream!!.flush()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            outputStream!!.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun getBitmapFromURL(src: String?): Bitmap? {
+        return try {
+            val url = URL(src)
+            val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+            connection.setDoInput(true)
+            connection.connect()
+            val input: InputStream = connection.getInputStream()
+            BitmapFactory.decodeStream(input)
+        } catch (e: IOException) {
+            // Log exception
+            null
+        }
+    }
 }
 
 class MovieViewHolder(itemView: View, listener: OnItemClickListener) :
@@ -312,6 +368,7 @@ class MovieViewHolder(itemView: View, listener: OnItemClickListener) :
 
         listenerRef.get()?.onItemClick(itemView, adapterPosition)
     }
+
 }
 
 class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
