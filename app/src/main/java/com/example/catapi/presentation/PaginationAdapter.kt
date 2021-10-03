@@ -5,6 +5,7 @@ import android.animation.Animator
 import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.RectF
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -149,8 +150,8 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
 
         // Calculate the starting and ending bounds for the zoomed-in image.
         // This step involves lots of math. Yay, math.
-        val startBounds = Rect()
-        val finalBounds = Rect()
+        val startBoundsInt = Rect()
+        val finalBoundsInt = Rect()
         val globalOffset = Point()
 
         // The start bounds are the global visible rectangle of the thumbnail,
@@ -158,11 +159,18 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
         // view. Also set the image view's offset as the origin for the
         // bounds, since that's the origin for the positioning animation
         // properties (X, Y).
-        vh.movieImage.getGlobalVisibleRect(startBounds)
-        vh.movieImageExpanded.getGlobalVisibleRect(finalBounds, globalOffset)
-        startBounds.offset(-globalOffset.x, -globalOffset.y)
-        finalBounds.offset(-globalOffset.x, -globalOffset.y)
+        vh.movieImage.getGlobalVisibleRect(startBoundsInt)
+        vh.movieImageExpanded.getGlobalVisibleRect(finalBoundsInt, globalOffset)
+        startBoundsInt.offset(-globalOffset.x, -globalOffset.y)
+        finalBoundsInt.offset(-globalOffset.x, -globalOffset.y)
 
+        val startBounds = RectF(startBoundsInt)
+        val finalBounds = RectF(finalBoundsInt)
+
+        // Adjust the start bounds to be the same aspect ratio as the final
+        // bounds using the "center crop" technique. This prevents undesirable
+        // stretching during the animation. Also calculate the start scaling
+        // factor (the end scaling factor is always 1.0).
 
 
     }
