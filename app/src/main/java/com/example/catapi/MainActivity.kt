@@ -1,11 +1,13 @@
 package com.example.catapi
 
+import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.ProgressBar
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catapi.Utills.CONSTANTS
 import com.example.catapi.Utills.CONSTANTS.TAG
@@ -36,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        requestPerms()
 
         var recyclerView: RecyclerView = findViewById(R.id.recyclerview)
         progressBar = findViewById(R.id.progressbar)
@@ -92,6 +96,12 @@ class MainActivity : AppCompatActivity() {
 //        )
 
         loadFirstPage()
+    }
+
+    private fun requestPerms() {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),1)
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),1)
+
     }
 
     private fun loadNextPage() {

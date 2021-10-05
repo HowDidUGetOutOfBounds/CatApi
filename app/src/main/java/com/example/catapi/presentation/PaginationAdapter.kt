@@ -34,6 +34,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import android.graphics.Bitmap
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
 
@@ -101,7 +103,9 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
                 }
 
                 movieViewHolder.downloadBtn.setOnClickListener {
-                    saveImageToGallery(position)
+                    GlobalScope.launch {
+                        saveImageToGallery(position)
+                    }
                 }
 
                 Glide.with(context).load(movie.url).apply(RequestOptions.centerCropTransform())
@@ -285,7 +289,7 @@ class PaginationAdapter(context: Context, listener: OnItemClickListener) :
 
     }
 
-    private fun saveImageToGallery(position: Int) {
+    private suspend fun saveImageToGallery(position: Int) {
         val bitmapDrawable : BitmapDrawable = BitmapDrawable(context.resources, getBitmapFromURL(catList[position].url))
 
         val bitmap : Bitmap = bitmapDrawable.bitmap
